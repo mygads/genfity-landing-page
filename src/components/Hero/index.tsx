@@ -1,3 +1,5 @@
+"use client";
+
 import { HeroData } from "@/static/heroData";
 import { GridBeam } from "../ui/grid-beams";
 

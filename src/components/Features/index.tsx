@@ -1,3 +1,5 @@
+"use client";
+
 import { ServicesData } from "@/static/servicesData";
 import SectionTitle from "../Common/SectionTitle";
 import SingleFeature from "./SingleFeature";

@@ -1,3 +1,5 @@
+"use client";
+
 const TagButton = ({ href = "#0", text }: { href?: string; text: string }) => {
   return (
     <a

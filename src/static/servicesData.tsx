@@ -21,7 +21,7 @@ export const ServicesData = {
         "Unlock the power of a dedicated in-house team that integrates seamlessly with your business to drive growth, efficiency, and innovation",
     },
     {
-      id: 1,
+      id: 2,
       icon: (
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -38,7 +38,7 @@ export const ServicesData = {
         "Operational-as-a-service Revolutionizing businesses with end-to-end organizational support for seamless growth",
     },
     {
-      id: 1,
+      id: 3,
       icon: (
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -55,7 +55,7 @@ export const ServicesData = {
         "We craft tailored AI solutions designed to solve your unique business challenges, enhance decision-making, and drive operational efficiency",
     },
     {
-      id: 1,
+      id: 4,
       icon: (
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -72,7 +72,7 @@ export const ServicesData = {
         "Empowering your business with cutting-edge software solutions tailored to streamline operations, improve efficiency, and drive innovation",
     },
     {
-      id: 1,
+      id: 5,
       icon: (
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -89,7 +89,7 @@ export const ServicesData = {
         "Revolutionize your business with smart IoT solutions that enable real-time data collection, enhance connectivity, and improve operational efficiency",
     },
     {
-      id: 1,
+      id: 6,
       icon: (
         <svg
           xmlns="http://www.w3.org/2000/svg"

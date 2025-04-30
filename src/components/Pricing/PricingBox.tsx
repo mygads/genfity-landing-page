@@ -1,3 +1,5 @@
+"use client";
+
 import { FlickeringGrid } from "../ui/flickering-grid";
 
 const PricingBox = (props: {

@@ -1,3 +1,5 @@
+"use client";
+
 import SectionTitle from "../Common/SectionTitle";
 import { HeroVideoDialog } from "../ui/hero-video-dialog";
 

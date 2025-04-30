@@ -1,3 +1,5 @@
+"use client";
+
 import SectionTitle from "../Common/SectionTitle";
 import { InteractiveHoverButton } from "../ui/interactive-hover-button";
 import SingleBlog from "./SingleBlog";

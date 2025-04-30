@@ -1,3 +1,5 @@
+"use client";
+
 import { PricingData } from "@/static/pricingData";
 import SectionTitle from "../Common/SectionTitle";
 import OfferList from "./OfferList";
@@ -55,15 +57,15 @@ const Pricing = () => {
         </div> */}
 
         <div className="flex items-center justify-evenly flex-wrap gap-x-6 gap-y-10">
-          {PricingData.package.map((pricing) => (
+          {PricingData.package.map((pricing, idx) => (
             <PricingBox
-              key={pricing.id}
+              key={`${pricing.id}-${idx}`}
               packageName={pricing.title}
               duration={pricing.span}
               price={pricing.price}
             >
-              {pricing.features.map((feature) => (
-                <OfferList text={feature} status="active" />
+              {pricing.features.map((feature, fidx) => (
+                <OfferList key={feature + fidx} text={feature} status="active" />
               ))}
             </PricingBox>
           ))}

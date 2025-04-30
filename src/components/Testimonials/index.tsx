@@ -1,3 +1,5 @@
+"use client";
+
 import SectionTitle from "../Common/SectionTitle";
 import SingleTestimonial from "./SingleTestimonial";
 import { TestimonialsData } from "@/static/TestimonialsData";
