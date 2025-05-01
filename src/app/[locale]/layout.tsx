@@ -9,6 +9,7 @@ import { Providers } from "./providers";
 import { Metadata } from "next";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { CartProvider } from "@/components/Cart/CartContext";
 
 export async function generateMetadata({params}) {
   const {locale} = await params;
@@ -52,12 +53,14 @@ export default async function LocaleLayout({children, params}) {
     <html suppressHydrationWarning lang={locale}>
       <body className={`bg-white dark:bg-black ${inter.className}`}>
         <Providers>
-          <NextIntlClientProvider locale={locale}>
-            <Header />
-            {children}
-            <Footer />
-            <ScrollToTop />
-          </NextIntlClientProvider>
+          <CartProvider>
+            <NextIntlClientProvider locale={locale}>
+              <Header />
+              {children}
+              <Footer />
+              <ScrollToTop />
+            </NextIntlClientProvider>
+          </CartProvider>
         </Providers>
       </body>
     </html>

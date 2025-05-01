@@ -2,11 +2,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import ThemeToggler from "./ThemeToggler";
 import menuData from "./menuData";
 import { InteractiveHoverButton } from "../ui/interactive-hover-button";
 import { ScrollProgress } from "../ui/scroll-progress";
+import { useParams, useRouter } from "next/navigation";
+import { useCart } from "@/components/Cart/CartContext";
+import CartSidebar from "../Cart/CartSidebar";
+import { IoCartOutline } from "react-icons/io5";
 
 const Header = () => {
   // Navbar toggle
@@ -39,23 +43,87 @@ const Header = () => {
   };
 
   const usePathName = usePathname();
+  const params = useParams();
+  const router = useRouter();
+  const currentLocale = Array.isArray(params?.locale) ? params.locale[0] : params?.locale || "en";
+  const otherLocale = currentLocale === "en" ? "id" : "en";
+
+  // Fungsi untuk switch bahasa
+  const handleLocaleSwitch = (targetLocale) => {
+    const segments = usePathName.split("/").filter(Boolean);
+    if (segments[0] === "en" || segments[0] === "id") {
+      segments[0] = targetLocale;
+    } else {
+      segments.unshift(targetLocale);
+    }
+    const newPath = "/" + segments.join("/");
+    router.push(newPath);
+  };
+
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Tutup dropdown jika klik di luar
+  const handleClickOutside = useCallback((event) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      setDropdownOpen(false);
+    }
+  }, []);
+  useEffect(() => {
+    if (dropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [dropdownOpen, handleClickOutside]);
+
+  const flagSVG = {
+    en: (
+      // UK flag (Union Jack) - improved and more accurate
+      <svg width="20" height="14" viewBox="0 0 60 42" className="inline-block mr-2 align-middle">
+        <rect width="60" height="42" fill="#012169"/>
+        <g>
+          <polygon points="0,0 60,42 60,38 8,0" fill="#FFF"/>
+          <polygon points="60,0 0,42 0,38 52,0" fill="#FFF"/>
+          <polygon points="0,0 24,16 20,16 0,2" fill="#C8102E"/>
+          <polygon points="60,0 36,16 40,16 60,2" fill="#C8102E"/>
+          <polygon points="0,42 24,26 20,26 0,40" fill="#C8102E"/>
+          <polygon points="60,42 36,26 40,26 60,40" fill="#C8102E"/>
+        </g>
+        <rect x="25" width="10" height="42" fill="#FFF"/>
+        <rect y="16" width="60" height="10" fill="#FFF"/>
+        <rect x="27" width="6" height="42" fill="#C8102E"/>
+        <rect y="18" width="60" height="6" fill="#C8102E"/>
+      </svg>
+    ),
+    id: (
+      <svg width="20" height="14" viewBox="0 0 20 14" className="inline-block mr-2 align-middle"><rect width="20" height="7" fill="#e70011"/><rect y="7" width="20" height="7" fill="#fff"/></svg>
+    )
+  };
+
+  const { items } = useCart();
+  const [cartOpen, setCartOpen] = useState(false);
+  const totalQty = items.reduce((sum, item) => sum + item.qty, 0);
 
   return (
     <>
       <header
-        className={`header left-0 top-0 z-40 flex w-full items-center ${
+        className={`header left-0 top-0 z-30 flex w-full items-center ${
           sticky
-            ? "dark:bg-gray-dark dark:shadow-sticky-dark fixed z-[9999] bg-white !bg-opacity-80 shadow-sticky backdrop-blur-sm transition"
+            ? "dark:bg-gray-dark dark:shadow-sticky-dark fixed bg-white !bg-opacity-80 shadow-sticky backdrop-blur-sm transition"
             : "absolute bg-transparent"
         }`}
       >
         <div className="container">
           <div className="relative -mx-4 flex items-center justify-between">
-            <div className="w-60 max-w-full px-4 xl:mr-12">
+            <div className="w-60 max-w-full px-4">
               <Link
                 href="/"
                 className={`header-logo block w-full ${
-                  sticky ? "py-5 lg:py-2" : "py-8"
+                  sticky ? "py-5 lg:py-2" : "py-5"
                 } `}
               >
                 <Image
@@ -160,33 +228,70 @@ const Header = () => {
                   </ul>
                   {/* Add Sign In and Sign Up Buttons */}
                   <div className="mt-4 border-t border-gray-300 pt-4 dark:border-gray-700 lg:hidden">
-                    <Link
-                      href="/signin"
-                      className="block w-full px-4 py-2 text-center text-base font-medium text-dark hover:opacity-70 dark:text-white"
-                    >
-                      Sign In
-                    </Link>
+                    <div className="mb-2">
+                      <button
+                        onClick={() => handleLocaleSwitch(otherLocale)}
+                        className="flex items-center w-full px-3 py-2 rounded border text-sm font-medium bg-gray-100 dark:bg-gray-800 hover:bg-primary hover:text-white transition"
+                      >
+                        {flagSVG[otherLocale]}
+                        <span className="ml-1 uppercase">{otherLocale}</span>
+                      </button>
+                    </div>
                     <InteractiveHoverButton
                       className="block w-full px-4 py-2 text-center mt-2"
-                      link="/signup"
-                      text="Sign Up"
+                      link="/signin"
+                      text="Sign In"
                     />
                   </div>
                 </nav>
               </div>
 
-              <div className="flex items-center justify-end pr-16 lg:pr-0">
-                <Link
-                  href="/signin"
-                  className="hidden px-7 py-3 text-base font-medium text-dark hover:opacity-70 dark:text-white md:block"
+              <div className="flex items-center justify-end pr-16 lg:pr-0 gap-2">
+                <button
+                  className="relative p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+                  aria-label="Cart"
+                  onClick={() => setCartOpen(true)}
                 >
-                  Sign In
-                </Link>
+                  <IoCartOutline    className="w-6 h-6" />
+                  {totalQty > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-dark text-white text-xs rounded-full px-1.5 py-0.5 min-w-[20px] text-center">
+                      {totalQty}
+                    </span>
+                  )}
+                </button>
                 <InteractiveHoverButton
                   className="hidden md:block"
-                  link="/signup"
-                  text="Sign Up"
+                  link="/signin"
+                  text="Sign In"
                 />
+                {/* Language Switcher: Desktop only */}
+                <div className="relative hidden lg:block" ref={dropdownRef}>
+                  <button
+                    onClick={() => setDropdownOpen((v) => !v)}
+                    className="flex items-center px-2 py-2 rounded-xl border border-transparent text-sm font-medium bg-transparent hover:bg-gray-100 dark:hover:bg-stroke-dark dark:hover:text-white transition min-w-[70px]"
+                  >
+                    {flagSVG[currentLocale]}
+                    <span className="ml-1 uppercase">{currentLocale}</span>
+                    <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                  </button>
+                  {dropdownOpen && (
+                    <div className="absolute right-0 mt-2 w-22 bg-white dark:bg-gray-900 rounded shadow-lg z-50 border border-gray-200 dark:border-gray-700 animate-fade-in">
+                      {["en", "id"].map((locale) => (
+                        <button
+                          key={locale}
+                          onClick={() => {
+                            setDropdownOpen(false);
+                            if (locale !== currentLocale) handleLocaleSwitch(locale);
+                          }}
+                          className={`flex items-center w-full px-3 py-2 text-left hover:bg-primary/10 dark:hover:bg-primary/20 transition ${locale === currentLocale ? "font-bold bg-gray-100 dark:bg-gray-800" : ""}`}
+                        >
+                          {flagSVG[locale]}
+                          <span className="ml-1 uppercase">{locale}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 <div>
                   <ThemeToggler />
                 </div>
@@ -195,6 +300,7 @@ const Header = () => {
           </div>
           <ScrollProgress className="absolute bottom-0" />
         </div>
+        <CartSidebar open={cartOpen} onClose={() => setCartOpen(false)} />
       </header>
     </>
   );
