@@ -2,8 +2,10 @@
 
 import { HeroData } from "@/static/heroData";
 import { GridBeam } from "../ui/grid-beams";
+import { useTranslations } from "next-intl";
 
 const Hero = () => {
+  const t = useTranslations('HomePage');
   return (
     <>
       <section
@@ -15,7 +17,7 @@ const Hero = () => {
             <div className="w-full px-4">
               <div className="mx-auto max-w-[800px] text-center">
                 <h1 className="mb-5 text-3xl font-bold leading-tight text-black dark:text-white sm:text-4xl sm:leading-tight md:text-5xl md:leading-tight">
-                  {HeroData.title}
+                  {t('title')}
                 </h1>
                 <p className=" mb-12 text-base !leading-relaxed text-body-color dark:text-body-color-dark sm:text-lg md:text-xl">
                   {HeroData.subtitle}
