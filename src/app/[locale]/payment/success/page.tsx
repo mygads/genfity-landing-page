@@ -23,7 +23,7 @@ export default function PaymentSuccessPage() {
   }, [])
 
   return (
-    <div className="container mx-auto py-20 px-4">
+    <div className="container mx-auto py-24 px-4">
       <div className="max-w-md mx-auto text-center">
         <div className="flex justify-center mb-6">
           <div className="h-24 w-24 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
@@ -62,11 +62,19 @@ export default function PaymentSuccessPage() {
           selanjutnya.
         </div>
 
-        <Link href="/">
-          <button className="w-full rounded-lg bg-primary py-3 font-medium text-white transition-all hover:bg-primary/90">
-            Kembali ke Beranda {countdown > 0 ? `(${countdown})` : ""}
-          </button>
-        </Link>
+        <div className="space-y-3">
+          <Link href="/dashboard">
+            <button className="w-full rounded-lg bg-primary py-3 font-medium text-white transition-all hover:bg-primary/90">
+              Lihat Status Pesanan
+            </button>
+          </Link>
+
+          <Link href="/">
+            <button className="w-full rounded-lg border border-gray-200 dark:border-gray-700 py-3 font-medium transition-all hover:bg-gray-50 dark:hover:bg-gray-800">
+              Kembali ke Beranda {countdown > 0 ? `(${countdown})` : ""}
+            </button>
+          </Link>
+        </div>
       </div>
     </div>
   )

@@ -3,7 +3,7 @@
 import type React from "react"
 import { useCart } from "./CartContext"
 import { motion, AnimatePresence } from "framer-motion"
-import { ShoppingCart, X, Trash2, Plus, Minus, ArrowRight } from "lucide-react"
+import { ShoppingCart, X, Trash2, Plus, Minus, ArrowRight, Check } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 
@@ -13,8 +13,19 @@ interface CartSidebarProps {
 }
 
 const CartSidebar: React.FC<CartSidebarProps> = ({ open, onClose }) => {
-  const { items, removeFromCart, updateQuantity, clearCart } = useCart()
+  const {
+    items,
+    removeFromCart,
+    updateQuantity,
+    clearCart,
+    toggleItemSelection,
+    selectAllItems,
+    selectedItemsTotal,
+    selectedItemsCount,
+  } = useCart()
+
   const total = items.reduce((sum, item) => sum + item.price * item.qty, 0)
+  const allSelected = items.length > 0 && items.every((item) => item.selected)
 
   // Create a map to group items by category (add-ons vs regular items)
   const addOns = items.filter(
@@ -37,19 +48,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ open, onClose }) => {
 
   return (
     <>
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/40 z-[99999]"
-            onClick={onClose}
-            aria-label="Tutup keranjang"
-          />
-        )}
-      </AnimatePresence>
+      
 
       <motion.div
         initial={{ x: "100%" }}
@@ -105,6 +104,24 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ open, onClose }) => {
               </motion.div>
             ) : (
               <>
+                {/* Select All Option */}
+                <div className="mb-4 flex items-center justify-between">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <div
+                      className={`flex h-5 w-5 items-center justify-center rounded border ${
+                        allSelected ? "bg-primary border-primary text-white" : "border-gray-300 dark:border-gray-600"
+                      }`}
+                      onClick={() => selectAllItems(!allSelected)}
+                    >
+                      {allSelected && <Check className="h-3 w-3" />}
+                    </div>
+                    <span className="text-sm font-medium">Pilih Semua</span>
+                  </label>
+                  <button onClick={clearCart} className="text-sm text-red-500 hover:underline">
+                    Hapus Semua
+                  </button>
+                </div>
+
                 {/* Regular Items */}
                 {regularItems.length > 0 && (
                   <div className="mb-6">
@@ -117,9 +134,27 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ open, onClose }) => {
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, height: 0, marginTop: 0 }}
                           transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                          className="group relative rounded-xl border border-gray-100 bg-white p-4 shadow-sm transition-all hover:shadow-md dark:border-gray-800 dark:bg-gray-800/50"
+                          className={`group relative rounded-xl border p-4 shadow-sm transition-all hover:shadow-md ${
+                            item.selected
+                              ? "border-primary/30 bg-primary/5 dark:border-primary/20 dark:bg-primary/10"
+                              : "border-gray-100 bg-white dark:border-gray-800 dark:bg-gray-800/50"
+                          }`}
                         >
                           <div className="flex gap-4">
+                            <div
+                              className="flex items-center justify-center cursor-pointer"
+                              onClick={() => toggleItemSelection(item.id, !item.selected)}
+                            >
+                              <div
+                                className={`flex h-5 w-5 items-center justify-center rounded-full border ${
+                                  item.selected
+                                    ? "bg-primary border-primary text-white"
+                                    : "border-gray-300 dark:border-gray-600"
+                                }`}
+                              >
+                                {item.selected && <Check className="h-3 w-3" />}
+                              </div>
+                            </div>
                             <div className="h-16 w-16 overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-700">
                               {item.image && (
                                 <Image
@@ -190,9 +225,27 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ open, onClose }) => {
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, height: 0, marginTop: 0 }}
                           transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                          className="group relative rounded-xl border border-dashed border-primary/30 bg-white p-4 shadow-sm transition-all hover:shadow-md dark:border-primary/20 dark:bg-gray-800/50"
+                          className={`group relative rounded-xl border border-dashed p-4 shadow-sm transition-all hover:shadow-md ${
+                            item.selected
+                              ? "border-primary/30 bg-primary/5 dark:border-primary/20 dark:bg-primary/10"
+                              : "border-primary/30 bg-white dark:border-primary/20 dark:bg-gray-800/50"
+                          }`}
                         >
                           <div className="flex gap-4">
+                            <div
+                              className="flex items-center justify-center cursor-pointer"
+                              onClick={() => toggleItemSelection(item.id, !item.selected)}
+                            >
+                              <div
+                                className={`flex h-5 w-5 items-center justify-center rounded-full border ${
+                                  item.selected
+                                    ? "bg-primary border-primary text-white"
+                                    : "border-gray-300 dark:border-gray-600"
+                                }`}
+                              >
+                                {item.selected && <Check className="h-3 w-3" />}
+                              </div>
+                            </div>
                             <div className="h-12 w-12 overflow-hidden rounded-lg bg-primary/10 dark:bg-primary/20 p-2">
                               {item.image && (
                                 <Image
@@ -255,20 +308,20 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ open, onClose }) => {
           {items.length > 0 && (
             <>
               <div className="mb-4 flex items-center justify-between text-sm">
-                <span className="text-gray-500 dark:text-gray-400">Subtotal</span>
-                <span>Rp{total.toLocaleString()}</span>
+                <span className="text-gray-500 dark:text-gray-400">Subtotal ({selectedItemsCount} item)</span>
+                <span>Rp{selectedItemsTotal.toLocaleString()}</span>
               </div>
               <div className="mb-6 flex items-center justify-between font-medium">
                 <span>Total</span>
-                <span className="text-lg">Rp{total.toLocaleString()}</span>
+                <span className="text-lg">Rp{selectedItemsTotal.toLocaleString()}</span>
               </div>
               <div className="space-y-3">
                 <Link href="/checkout" onClick={onClose}>
                   <button
                     className="relative w-full overflow-hidden rounded-lg bg-primary py-3 font-medium text-white transition-all hover:shadow-lg hover:shadow-primary/30 active:scale-[0.98] disabled:opacity-70"
-                    disabled={items.length === 0}
+                    disabled={selectedItemsCount === 0}
                   >
-                    <span className="relative z-10">Checkout</span>
+                    <span className="relative z-10">Checkout ({selectedItemsCount})</span>
                     <span className="absolute inset-0 bg-gradient-to-r from-primary/80 to-primary opacity-0 transition-opacity hover:opacity-100"></span>
                   </button>
                 </Link>

@@ -5,19 +5,23 @@ import { ArrowLeft, Check, Copy, RefreshCw } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { useCart } from "@/components/Cart/CartContext"
+import { useAuth } from "@/components/Auth/AuthContext"
 
 export default function PaymentPage() {
   const [copied, setCopied] = useState(false)
   const [confirmed, setConfirmed] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+  const { removeSelectedItems, selectedItemsTotal } = useCart()
+  const { isAuthenticated } = useAuth()
 
   // Demo payment details
   const paymentDetails = {
     bank: "Bank Central Asia (BCA)",
     accountNumber: "1234567890",
     accountName: "PT Digital Kreasi",
-    amount: "2,750,000",
+    amount: selectedItemsTotal.toLocaleString(),
     expiry: "24 jam",
     reference: "INV/2023/05/123456",
   }
@@ -34,6 +38,10 @@ export default function PaymentPage() {
     setTimeout(() => {
       setIsLoading(false)
       setConfirmed(true)
+
+      // Remove selected items from cart after successful payment
+      removeSelectedItems()
+
       // Simulate redirect to success page
       setTimeout(() => {
         router.push("/payment/success")
@@ -42,7 +50,7 @@ export default function PaymentPage() {
   }
 
   return (
-    <div className="container mx-auto py-12 px-4">
+    <div className="container mx-auto py-12 pt-24 px-4">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold mb-6">Instruksi Pembayaran</h1>
 
@@ -158,25 +166,33 @@ export default function PaymentPage() {
             </button>
           </Link>
 
-          <button
-            onClick={handleConfirmPayment}
-            disabled={isLoading || confirmed}
-            className="flex items-center justify-center gap-2 rounded-lg bg-primary px-6 py-2.5 font-medium text-white transition-all hover:bg-primary/90 disabled:opacity-70"
-          >
-            {isLoading ? (
-              <>
-                <RefreshCw className="h-4 w-4 animate-spin" />
-                Memproses...
-              </>
-            ) : confirmed ? (
-              <>
-                <Check className="h-4 w-4" />
-                Pembayaran Dikonfirmasi
-              </>
-            ) : (
-              "Konfirmasi Pembayaran"
-            )}
-          </button>
+          <div className="flex items-center gap-3">
+            <Link href="/dashboard">
+              <button className="px-4 py-2.5 text-sm font-medium text-primary hover:underline">
+                Cek Status Pesanan
+              </button>
+            </Link>
+
+            <button
+              onClick={handleConfirmPayment}
+              disabled={isLoading || confirmed}
+              className="flex items-center justify-center gap-2 rounded-lg bg-primary px-6 py-2.5 font-medium text-white transition-all hover:bg-primary/90 disabled:opacity-70"
+            >
+              {isLoading ? (
+                <>
+                  <RefreshCw className="h-4 w-4 animate-spin" />
+                  Memproses...
+                </>
+              ) : confirmed ? (
+                <>
+                  <Check className="h-4 w-4" />
+                  Pembayaran Dikonfirmasi
+                </>
+              ) : (
+                "Konfirmasi Pembayaran"
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>

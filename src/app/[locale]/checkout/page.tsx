@@ -2,12 +2,14 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useAuth } from "@/components/Auth/AuthContext"
 import { useCart } from "@/components/Cart/CartContext"
 import { motion } from "framer-motion"
-import { ArrowLeft, ArrowRight, Check, Gift, Info, RefreshCw, Trash2, X } from "lucide-react"
+import { ArrowLeft, ArrowRight, Check, Gift, Info, LogIn, RefreshCw, Trash2, X } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 interface CheckoutForm {
   name: string
@@ -50,11 +52,11 @@ const Step = ({ title, isActive, isCompleted, number }: StepProps) => {
 }
 
 export default function CheckoutPage() {
-  const { items, removeFromCart, updateQuantity, clearCart } = useCart()
-  const total = items.reduce((sum, item) => sum + item.price * item.qty, 0)
+  const { user, isAuthenticated } = useAuth()
+  const { items, selectedItems, selectedItemsTotal, removeSelectedItems } = useCart()
 
-  // Group items by category (add-ons vs regular items)
-  const addOns = items.filter(
+  // Group selected items by category (add-ons vs regular items)
+  const addOns = selectedItems.filter(
     (item) =>
       item.id.startsWith("addon-") ||
       item.id.includes("additional-") ||
@@ -62,7 +64,7 @@ export default function CheckoutPage() {
         (addonId) => item.id.includes(addonId),
       ),
   )
-  const regularItems = items.filter((item) => !addOns.some((addon) => addon.id === item.id))
+  const regularItems = selectedItems.filter((item) => !addOns.some((addon) => addon.id === item.id))
 
   const [formData, setFormData] = useState<CheckoutForm>({
     name: "",
@@ -72,6 +74,18 @@ export default function CheckoutPage() {
     voucher: "",
   })
 
+  // Populate form data with user info when authenticated
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      setFormData((prev) => ({
+        ...prev,
+        name: user.name || prev.name,
+        email: user.email || prev.email,
+        whatsapp: user.whatsapp || prev.whatsapp,
+      }))
+    }
+  }, [isAuthenticated, user])
+
   const [step, setStep] = useState(1)
   const [voucherApplied, setVoucherApplied] = useState(false)
   const [voucherDiscount, setVoucherDiscount] = useState(0)
@@ -80,6 +94,15 @@ export default function CheckoutPage() {
   const [otpVerified, setOtpVerified] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [voucherError, setVoucherError] = useState("")
+  const router = useRouter()
+
+  // Skip verification step if user is already authenticated
+  useEffect(() => {
+    if (isAuthenticated && step === 2) {
+      setOtpVerified(true)
+      setStep(3)
+    }
+  }, [isAuthenticated, step])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -136,12 +159,20 @@ export default function CheckoutPage() {
       // Example: Check if voucher is valid
       if (formData.voucher.toUpperCase() === "DISKON10") {
         setVoucherApplied(true)
-        setVoucherDiscount(total * 0.1) // 10% discount
+        setVoucherDiscount(selectedItemsTotal * 0.1) // 10% discount
         setVoucherError("")
       } else {
         setVoucherError("Voucher tidak valid atau sudah kadaluarsa")
       }
     }, 1000)
+  }
+
+  const handlePaymentComplete = () => {
+    // Remove selected items from cart after successful payment
+    removeSelectedItems()
+
+    // Redirect to success page
+    router.push("/payment/success")
   }
 
   const handleNextStep = () => {
@@ -151,13 +182,19 @@ export default function CheckoutPage() {
         alert("Harap isi semua kolom wajib (nama, WhatsApp, email)")
         return
       }
-      setStep(2)
+
+      // If user is authenticated, skip verification step
+      if (isAuthenticated) {
+        setStep(3)
+      } else {
+        setStep(2)
+      }
     }
   }
 
-  const finalAmount = total - voucherDiscount
+  const finalAmount = selectedItemsTotal - voucherDiscount
 
-  if (items.length === 0) {
+  if (selectedItems.length === 0) {
     return (
       <div className="container mx-auto py-16 px-4">
         <div className="max-w-2xl mx-auto text-center">
@@ -166,8 +203,8 @@ export default function CheckoutPage() {
               <Trash2 className="h-full w-full" strokeWidth={1} />
             </div>
           </div>
-          <h1 className="text-3xl font-bold mb-4">Keranjang Anda Kosong</h1>
-          <p className="text-gray-500 dark:text-gray-400 mb-8">Anda belum menambahkan produk apapun ke keranjang</p>
+          <h1 className="text-3xl font-bold mb-4">Tidak Ada Item Terpilih</h1>
+          <p className="text-gray-500 dark:text-gray-400 mb-8">Anda belum memilih produk apapun di keranjang</p>
           <Link href="/products">
             <button className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 font-medium text-white transition-all hover:bg-primary/90">
               <ArrowLeft className="h-4 w-4" />
@@ -212,7 +249,30 @@ export default function CheckoutPage() {
               animate={{ opacity: 1, y: 0 }}
               className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 mb-6"
             >
-              <h2 className="text-xl font-bold mb-4">Informasi Kontak</h2>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold">Informasi Kontak</h2>
+                {!isAuthenticated && (
+                  <Link href="/login">
+                    <button className="flex items-center gap-2 rounded-lg bg-primary/10 px-4 py-2 text-sm font-medium text-primary transition-all hover:bg-primary hover:text-white">
+                      <LogIn className="h-4 w-4" />
+                      Login
+                    </button>
+                  </Link>
+                )}
+              </div>
+
+              {isAuthenticated && (
+                <div className="bg-green-50 dark:bg-green-950/30 border border-green-100 dark:border-green-900 rounded-lg p-4 mb-6 flex gap-3">
+                  <div className="text-green-500 mt-0.5">
+                    <Check className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-green-800 dark:text-green-300 text-sm">
+                      Anda telah login sebagai {user?.name}. Informasi kontak Anda telah diisi otomatis.
+                    </p>
+                  </div>
+                </div>
+              )}
               <div className="space-y-4">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium mb-1">
@@ -427,16 +487,29 @@ export default function CheckoutPage() {
             >
               <h2 className="text-xl font-bold mb-4">Metode Pembayaran</h2>
 
-              <div className="bg-green-50 dark:bg-green-950/30 border border-green-100 dark:border-green-900 rounded-lg p-4 mb-6 flex gap-3">
-                <div className="text-green-500 mt-0.5">
-                  <Check className="h-5 w-5" />
+              {isAuthenticated ? (
+                <div className="bg-green-50 dark:bg-green-950/30 border border-green-100 dark:border-green-900 rounded-lg p-4 mb-6 flex gap-3">
+                  <div className="text-green-500 mt-0.5">
+                    <Check className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-green-800 dark:text-green-300 text-sm">
+                      Anda telah login sebagai {user?.name}. Tidak perlu verifikasi lagi.
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-green-800 dark:text-green-300 text-sm">
-                    Nomor WhatsApp Anda telah berhasil diverifikasi. Silakan lanjutkan ke proses pembayaran.
-                  </p>
+              ) : (
+                <div className="bg-green-50 dark:bg-green-950/30 border border-green-100 dark:border-green-900 rounded-lg p-4 mb-6 flex gap-3">
+                  <div className="text-green-500 mt-0.5">
+                    <Check className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-green-800 dark:text-green-300 text-sm">
+                      Nomor WhatsApp Anda telah berhasil diverifikasi. Silakan lanjutkan ke proses pembayaran.
+                    </p>
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div className="space-y-6">
                 <div>
@@ -473,7 +546,7 @@ export default function CheckoutPage() {
 
               <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-800 flex justify-between">
                 <button
-                  onClick={() => setStep(2)}
+                  onClick={() => setStep(isAuthenticated ? 1 : 2)}
                   className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors"
                 >
                   <ArrowLeft className="h-4 w-4" />
@@ -613,7 +686,7 @@ export default function CheckoutPage() {
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-gray-500 dark:text-gray-400">Subtotal</span>
-                <span>Rp{total.toLocaleString()}</span>
+                <span>Rp{selectedItemsTotal.toLocaleString()}</span>
               </div>
 
               {voucherApplied && (

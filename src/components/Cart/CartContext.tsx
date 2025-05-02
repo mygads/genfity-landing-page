@@ -9,6 +9,7 @@ export interface CartItem {
   price: number
   image: string
   qty: number
+  selected?: boolean
 }
 
 interface CartContextType {
@@ -17,8 +18,14 @@ interface CartContextType {
   removeFromCart: (productId: string) => void
   updateQuantity: (productId: string, quantity: number) => void
   clearCart: () => void
+  toggleItemSelection: (productId: string, selected: boolean) => void
+  selectAllItems: (selected: boolean) => void
+  removeSelectedItems: () => void
+  selectedItems: CartItem[]
   totalItems: number
   totalPrice: number
+  selectedItemsCount: number
+  selectedItemsTotal: number
 }
 
 const CartContext = createContext<CartContextType>({
@@ -27,8 +34,14 @@ const CartContext = createContext<CartContextType>({
   removeFromCart: () => {},
   updateQuantity: () => {},
   clearCart: () => {},
+  toggleItemSelection: () => {},
+  selectAllItems: () => {},
+  removeSelectedItems: () => {},
+  selectedItems: [],
   totalItems: 0,
   totalPrice: 0,
+  selectedItemsCount: 0,
+  selectedItemsTotal: 0,
 })
 
 export const useCart = () => useContext(CartContext)
@@ -61,7 +74,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       if (existingItem) {
         return prevItems.map((item) => (item.id === product.id ? { ...item, qty: item.qty + product.qty } : item))
       } else {
-        return [...prevItems, product]
+        return [...prevItems, { ...product, selected: true }]
       }
     })
   }
@@ -79,12 +92,27 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     setItems((prevItems) => prevItems.map((item) => (item.id === productId ? { ...item, qty: quantity } : item)))
   }
 
+  const toggleItemSelection = (productId: string, selected: boolean) => {
+    setItems((prevItems) => prevItems.map((item) => (item.id === productId ? { ...item, selected } : item)))
+  }
+
+  const selectAllItems = (selected: boolean) => {
+    setItems((prevItems) => prevItems.map((item) => ({ ...item, selected })))
+  }
+
+  const removeSelectedItems = () => {
+    setItems((prevItems) => prevItems.filter((item) => !item.selected))
+  }
+
   const clearCart = () => {
     setItems([])
   }
 
+  const selectedItems = items.filter((item) => item.selected)
   const totalItems = items.reduce((sum, item) => sum + item.qty, 0)
   const totalPrice = items.reduce((sum, item) => sum + item.price * item.qty, 0)
+  const selectedItemsCount = selectedItems.reduce((sum, item) => sum + item.qty, 0)
+  const selectedItemsTotal = selectedItems.reduce((sum, item) => sum + item.price * item.qty, 0)
 
   return (
     <CartContext.Provider
@@ -94,8 +122,14 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         removeFromCart,
         updateQuantity,
         clearCart,
+        toggleItemSelection,
+        selectAllItems,
+        removeSelectedItems,
+        selectedItems,
         totalItems,
         totalPrice,
+        selectedItemsCount,
+        selectedItemsTotal,
       }}
     >
       {children}
