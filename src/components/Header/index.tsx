@@ -1,112 +1,116 @@
-"use client";
-import Image from "next/image";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useState, useRef, useCallback } from "react";
-import ThemeToggler from "./ThemeToggler";
-import menuData from "./menuData";
-import { InteractiveHoverButton } from "../ui/interactive-hover-button";
-import { ScrollProgress } from "../ui/scroll-progress";
-import { useParams, useRouter } from "next/navigation";
-import { useCart } from "@/components/Cart/CartContext";
-import CartSidebar from "../Cart/CartSidebar";
-import { IoCartOutline } from "react-icons/io5";
+"use client"
+import Image from "next/image"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { useEffect, useState, useRef, useCallback } from "react"
+import ThemeToggler from "./ThemeToggler"
+import menuData from "./menuData"
+import { InteractiveHoverButton } from "../ui/interactive-hover-button"
+import { ScrollProgress } from "../ui/scroll-progress"
+import { useParams, useRouter } from "next/navigation"
+import { useCart } from "@/components/Cart/CartContext"
+import CartSidebar from "../Cart/CartSidebar"
+import { IoCartOutline } from "react-icons/io5"
+import * as FiIcons from "react-icons/fi"
 
 const Header = () => {
   // Navbar toggle
-  const [navbarOpen, setNavbarOpen] = useState(false);
+  const [navbarOpen, setNavbarOpen] = useState(false)
   const navbarToggleHandler = () => {
-    setNavbarOpen(!navbarOpen);
-  };
+    setNavbarOpen(!navbarOpen)
+  }
 
   // Sticky Navbar
-  const [sticky, setSticky] = useState(false);
+  const [sticky, setSticky] = useState(false)
   const handleStickyNavbar = () => {
     if (window.scrollY >= 80) {
-      setSticky(true);
+      setSticky(true)
     } else {
-      setSticky(false);
+      setSticky(false)
     }
-  };
+  }
   useEffect(() => {
-    window.addEventListener("scroll", handleStickyNavbar);
-  });
+    window.addEventListener("scroll", handleStickyNavbar)
+  })
 
   // submenu handler
-  const [openIndex, setOpenIndex] = useState(-1);
+  const [openIndex, setOpenIndex] = useState(-1)
   const handleSubmenu = (index) => {
     if (openIndex === index) {
-      setOpenIndex(-1);
+      setOpenIndex(-1)
     } else {
-      setOpenIndex(index);
+      setOpenIndex(index)
     }
-  };
+  }
 
-  const usePathName = usePathname();
-  const params = useParams();
-  const router = useRouter();
-  const currentLocale = Array.isArray(params?.locale) ? params.locale[0] : params?.locale || "en";
-  const otherLocale = currentLocale === "en" ? "id" : "en";
+  const usePathName = usePathname()
+  const params = useParams()
+  const router = useRouter()
+  const currentLocale = Array.isArray(params?.locale) ? params.locale[0] : params?.locale || "en"
+  const otherLocale = currentLocale === "en" ? "id" : "en"
 
   // Fungsi untuk switch bahasa
   const handleLocaleSwitch = (targetLocale) => {
-    const segments = usePathName.split("/").filter(Boolean);
+    const segments = usePathName.split("/").filter(Boolean)
     if (segments[0] === "en" || segments[0] === "id") {
-      segments[0] = targetLocale;
+      segments[0] = targetLocale
     } else {
-      segments.unshift(targetLocale);
+      segments.unshift(targetLocale)
     }
-    const newPath = "/" + segments.join("/");
-    router.push(newPath);
-  };
+    const newPath = "/" + segments.join("/")
+    router.push(newPath)
+  }
 
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const dropdownRef = useRef(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const dropdownRef = useRef(null)
 
   // Tutup dropdown jika klik di luar
   const handleClickOutside = useCallback((event) => {
     if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-      setDropdownOpen(false);
+      setDropdownOpen(false)
     }
-  }, []);
+  }, [])
   useEffect(() => {
     if (dropdownOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside)
     } else {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside)
     }
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [dropdownOpen, handleClickOutside]);
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [dropdownOpen, handleClickOutside])
 
   const flagSVG = {
     en: (
       // UK flag (Union Jack) - improved and more accurate
       <svg width="20" height="14" viewBox="0 0 60 42" className="inline-block mr-2 align-middle">
-        <rect width="60" height="42" fill="#012169"/>
+        <rect width="60" height="42" fill="#012169" />
         <g>
-          <polygon points="0,0 60,42 60,38 8,0" fill="#FFF"/>
-          <polygon points="60,0 0,42 0,38 52,0" fill="#FFF"/>
-          <polygon points="0,0 24,16 20,16 0,2" fill="#C8102E"/>
-          <polygon points="60,0 36,16 40,16 60,2" fill="#C8102E"/>
-          <polygon points="0,42 24,26 20,26 0,40" fill="#C8102E"/>
-          <polygon points="60,42 36,26 40,26 60,40" fill="#C8102E"/>
+          <polygon points="0,0 60,42 60,38 8,0" fill="#FFF" />
+          <polygon points="60,0 0,42 0,38 52,0" fill="#FFF" />
+          <polygon points="0,0 24,16 20,16 0,2" fill="#C8102E" />
+          <polygon points="60,0 36,16 40,16 60,2" fill="#C8102E" />
+          <polygon points="0,42 24,26 20,26 0,40" fill="#C8102E" />
+          <polygon points="60,42 36,26 40,26 60,40" fill="#C8102E" />
         </g>
-        <rect x="25" width="10" height="42" fill="#FFF"/>
-        <rect y="16" width="60" height="10" fill="#FFF"/>
-        <rect x="27" width="6" height="42" fill="#C8102E"/>
-        <rect y="18" width="60" height="6" fill="#C8102E"/>
+        <rect x="25" width="10" height="42" fill="#FFF" />
+        <rect y="16" width="60" height="10" fill="#FFF" />
+        <rect x="27" width="6" height="42" fill="#C8102E" />
+        <rect y="18" width="60" height="6" fill="#C8102E" />
       </svg>
     ),
     id: (
-      <svg width="20" height="14" viewBox="0 0 20 14" className="inline-block mr-2 align-middle"><rect width="20" height="7" fill="#e70011"/><rect y="7" width="20" height="7" fill="#fff"/></svg>
-    )
-  };
+      <svg width="20" height="14" viewBox="0 0 20 14" className="inline-block mr-2 align-middle">
+        <rect width="20" height="7" fill="#e70011" />
+        <rect y="7" width="20" height="7" fill="#fff" />
+      </svg>
+    ),
+  }
 
-  const { items } = useCart();
-  const [cartOpen, setCartOpen] = useState(false);
-  const totalQty = items.reduce((sum, item) => sum + item.qty, 0);
+  const { items } = useCart()
+  const [cartOpen, setCartOpen] = useState(false)
+  const totalQty = items.reduce((sum, item) => sum + item.qty, 0)
 
   return (
     <>
@@ -120,19 +124,8 @@ const Header = () => {
         <div className="container">
           <div className="relative -mx-4 flex items-center justify-between">
             <div className="w-60 max-w-full px-4">
-              <Link
-                href="/"
-                className={`header-logo block w-full ${
-                  sticky ? "py-5 lg:py-2" : "py-5"
-                } `}
-              >
-                <Image
-                  src="/aahrbitx_dark.svg"
-                  alt="logo"
-                  width={140}
-                  height={30}
-                  className="w-full dark:hidden"
-                />
+              <Link href="/" className={`header-logo block w-full ${sticky ? "py-5 lg:py-2" : "py-5"} `}>
+                <Image src="/aahrbitx_dark.svg" alt="logo" width={140} height={30} className="w-full dark:hidden" />
                 <Image
                   src="/aahrbitx_light.svg"
                   alt="logo"
@@ -170,13 +163,18 @@ const Header = () => {
                   id="navbarCollapse"
                   className={`navbar absolute right-0 z-30 w-[250px] rounded border-[.5px] border-body-color/50 bg-white px-6 py-4 duration-300 dark:border-body-color/20 dark:bg-dark lg:visible lg:static lg:w-auto lg:border-none lg:!bg-transparent lg:p-0 lg:opacity-100 ${
                     navbarOpen
-                      ? "visibility top-full opacity-100"
+                      ? "visibility top-full opacity-100 max-h-[80vh] overflow-y-auto"
                       : "invisible top-[120%] opacity-0"
                   }`}
                 >
-                  <ul className="block lg:flex lg:space-x-12">
+                  <ul className="block lg:flex lg:space-x-8">
                     {menuData.slice(0, 5).map((menuItem, index) => (
-                      <li key={index} className="group relative">
+                      <li
+                        key={index}
+                        className="group relative"
+                        onMouseEnter={() => (menuItem.submenu || menuItem.megaMenu) && setOpenIndex(index)}
+                        onMouseLeave={() => (menuItem.submenu || menuItem.megaMenu) && setOpenIndex(-1)}
+                      >
                         {menuItem.path ? (
                           <Link
                             href={menuItem.path}
@@ -195,7 +193,7 @@ const Header = () => {
                               className="flex cursor-pointer items-center justify-between py-2 text-base text-dark group-hover:text-primary dark:text-white/70 dark:group-hover:text-white lg:mr-0 lg:inline-flex lg:px-0 lg:py-6"
                             >
                               {menuItem.title}
-                              <span className="pl-3">
+                              <span className="pl-1">
                                 <svg width="25" height="24" viewBox="0 0 25 24">
                                   <path
                                     fillRule="evenodd"
@@ -206,21 +204,77 @@ const Header = () => {
                                 </svg>
                               </span>
                             </p>
-                            <div
-                              className={`submenu relative left-0 top-full rounded-sm bg-white transition-[top] duration-300 group-hover:opacity-100 dark:bg-dark lg:invisible lg:absolute lg:top-[110%] lg:block lg:w-[250px] lg:p-4 lg:opacity-0 lg:shadow-lg lg:group-hover:visible lg:group-hover:top-full ${
-                                openIndex === index ? "block" : "hidden"
-                              }`}
-                            >
-                              {menuItem.submenu.map((submenuItem, index) => (
-                                <Link
-                                  href={submenuItem.path}
-                                  key={index}
-                                  className="block rounded py-2.5 text-sm text-dark hover:text-primary dark:text-white/70 dark:hover:text-white lg:px-3"
-                                >
-                                  {submenuItem.title}
-                                </Link>
-                              ))}
-                            </div>
+
+                            {/* Regular Submenu */}
+                            {menuItem.submenu && (
+                              <div
+                                className={`submenu relative left-0 top-full rounded-sm bg-white transition-[top] duration-300 group-hover:opacity-100 dark:bg-dark lg:invisible lg:absolute lg:top-[110%] lg:block lg:w-[250px] lg:p-4 lg:opacity-0 lg:shadow-lg lg:group-hover:visible lg:group-hover:top-full ${
+                                  openIndex === index ? "block max-h-[60vh] overflow-y-auto lg:max-h-none" : "hidden"
+                                }`}
+                                style={{
+                                  pointerEvents: openIndex === index ? "auto" : "none",
+                                  paddingTop: 16,
+                                  paddingBottom: 16,
+                                }}
+                              >
+                                {menuItem.submenu.map((submenuItem, idx) => {
+                                  const Icon = submenuItem.icon ? FiIcons[submenuItem.icon] : null
+                                  return (
+                                    <Link
+                                      href={submenuItem.path}
+                                      key={idx}
+                                      className="flex items-center gap-3 rounded-lg py-2.5 px-3 text-sm text-dark hover:bg-primary/10 hover:text-primary dark:text-white/70 dark:hover:text-white dark:hover:bg-primary/20 transition-all border border-transparent hover:border-primary/30 mb-1"
+                                      style={{ minHeight: 44 }}
+                                    >
+                                      {Icon && <Icon className="w-5 h-5 text-primary" />}
+                                      <span>{submenuItem.title}</span>
+                                    </Link>
+                                  )
+                                })}
+                              </div>
+                            )}
+
+                            {/* Mega Menu */}
+                            {menuItem.megaMenu && (
+                              <div
+                                className={`mega-menu relative left-0 top-full rounded-sm bg-white transition-[top] duration-300 group-hover:opacity-100 dark:bg-dark lg:invisible lg:absolute lg:top-[110%] lg:block lg:w-[750px] lg:p-6 lg:opacity-0 lg:shadow-lg lg:group-hover:visible lg:group-hover:top-full ${
+                                  openIndex === index ? "block max-h-[60vh] overflow-y-auto lg:max-h-none" : "hidden"
+                                }`}
+                                style={{ pointerEvents: openIndex === index ? "auto" : "none" }}
+                              >
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                  {menuItem.megaMenu.map((category, catIdx) => (
+                                    <div key={catIdx} className="space-y-4">
+                                      <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 border-b pb-2">
+                                        {category.title}
+                                      </h3>
+                                      <div className="space-y-2">
+                                        {category.items.map((item, itemIdx) => {
+                                          const Icon = item.icon ? FiIcons[item.icon] : null
+                                          return (
+                                            <Link
+                                              href={item.path}
+                                              key={itemIdx}
+                                              className="flex items-start gap-3 rounded-lg py-2 px-3 text-sm text-dark hover:bg-primary/10 hover:text-primary dark:text-white/70 dark:hover:text-white dark:hover:bg-primary/20 transition-all border border-transparent hover:border-primary/30"
+                                            >
+                                              {Icon && <Icon className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />}
+                                              <div>
+                                                <div className="font-medium">{item.title}</div>
+                                                {item.desc && (
+                                                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-tight">
+                                                    {item.desc}
+                                                  </div>
+                                                )}
+                                              </div>
+                                            </Link>
+                                          )
+                                        })}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
                           </>
                         )}
                       </li>
@@ -252,18 +306,14 @@ const Header = () => {
                   aria-label="Cart"
                   onClick={() => setCartOpen(true)}
                 >
-                  <IoCartOutline    className="w-6 h-6" />
+                  <IoCartOutline className="w-6 h-6" />
                   {totalQty > 0 && (
                     <span className="absolute -top-1 -right-1 bg-dark text-white text-xs rounded-full px-1.5 py-0.5 min-w-[20px] text-center">
                       {totalQty}
                     </span>
                   )}
                 </button>
-                <InteractiveHoverButton
-                  className="hidden md:block"
-                  link="/signin"
-                  text="Sign In"
-                />
+                <InteractiveHoverButton className="hidden md:block" link="/signin" text="Sign In" />
                 {/* Language Switcher: Desktop only */}
                 <div className="relative hidden lg:block" ref={dropdownRef}>
                   <button
@@ -272,7 +322,9 @@ const Header = () => {
                   >
                     {flagSVG[currentLocale]}
                     <span className="ml-1 uppercase">{currentLocale}</span>
-                    <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                    <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
                   </button>
                   {dropdownOpen && (
                     <div className="absolute right-0 mt-2 w-22 bg-white dark:bg-gray-900 rounded shadow-lg z-50 border border-gray-200 dark:border-gray-700 animate-fade-in">
@@ -280,8 +332,8 @@ const Header = () => {
                         <button
                           key={locale}
                           onClick={() => {
-                            setDropdownOpen(false);
-                            if (locale !== currentLocale) handleLocaleSwitch(locale);
+                            setDropdownOpen(false)
+                            if (locale !== currentLocale) handleLocaleSwitch(locale)
                           }}
                           className={`flex items-center w-full px-3 py-2 text-left hover:bg-primary/10 dark:hover:bg-primary/20 transition ${locale === currentLocale ? "font-bold bg-gray-100 dark:bg-gray-800" : ""}`}
                         >
@@ -303,7 +355,7 @@ const Header = () => {
         <CartSidebar open={cartOpen} onClose={() => setCartOpen(false)} />
       </header>
     </>
-  );
-};
+  )
+}
 
-export default Header;
+export default Header
